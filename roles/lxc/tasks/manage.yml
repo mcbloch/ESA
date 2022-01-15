@@ -1,0 +1,148 @@
+---
+- name: Manage | Clean up stale LXC subsystem lock
+  file:
+    path: /var/lock/subsys/lxc
+    state: absent
+
+- name: Manage | Get Active state of default network bridge
+  shell:
+    cmd: virsh net-info default | grep -c "Active:[ ]*yes"
+  register: virsh_default_active
+  ignore_errors: true
+  changed_when: false
+
+- assert:
+    that:
+      - "virsh_default_active.stdout == '0' or virsh_default_active.stdout == '1'"
+    fail_msg: "Matching lines should be 0 or 1"
+    quiet: true
+
+- name: Manage | Start the default network bridge
+  command: virsh net-start default
+  when: virsh_default_active.stdout == "0"
+
+- name: Manage | Get Autostart state of default network bridge
+  shell: virsh net-info default | grep -c "Autostart:[ ]*yes"
+  register: virsh_default_autostart
+  ignore_errors: true
+  changed_when: false
+
+- assert:
+    that:
+      - "virsh_default_autostart.stdout == '0' or virsh_default_autostart.stdout == '1'"
+    fail_msg: "Matching lines should be 0 or 1"
+    quiet: true
+
+- name: Manage | Autostart the default network bridge
+  command: virsh net-autostart default
+  when: virsh_default_autostart.stdout == "0"
+
+- name: Manage | Find existing containers
+  stat:
+    path: "/var/lib/lxc/{{ item.key }}"
+  with_dict: "{{ lxc_containers }}"
+  register: lxc_dirs
+
+- name: Manage | Create Containers
+  lxc_container:
+    name: "{{ item.item.key }}"
+    template: download
+    template_options: >
+      --dist {{ item.item.value.distro | default('debian') }}
+      --release {{ item.item.value.release | default('buster') }}
+      --arch {{ item.item.value.arch | default('amd64') }}
+    backing_store: "{{ item.item.value.store | default('dir') }}"
+    state: stopped
+    container_log: true
+  when: not item.stat.exists
+  with_items: "{{ lxc_dirs.results }}"
+  register: lxc_create
+
+# - name: Manage | Container Mounts
+#   template:
+#     src: fstab.j2
+#     dest: "/var/lib/lxc/{{ item.key }}/fstab"
+#   with_dict: "{{ lxc_containers }}"
+
+- name: Manage | Container Configurations
+  template:
+    src: lxc-config.j2
+    dest: "/var/lib/lxc/{{ item.key }}/config"
+  register: lxc_config
+  with_dict: "{{ lxc_containers }}"
+
+# - name: Manage | Debian | Render Network Configuration
+#   template:
+#     src: lxc-eni.j2
+#     dest: "/var/lib/lxc/{{ item.key }}/rootfs/etc/network/interfaces"
+#   with_dict: "{{ lxc_containers }}"
+#   when: item.value.store | default('dir') == 'dir' and
+#         item.value.distro | default('debian') == 'debian'
+
+# - debug:
+#     msg: "{{ lxc_config }}"
+# - debug:
+#     msg: "{{ lxc_containers }}"
+
+# lxc restart behavior is split into start/stop
+# possible bug or race condition in tooling or Ansible module
+- name: Manage | Stop Modified Containers when lxc_restart == YES
+  lxc_container:
+    name: "{{ item.item.key }}"
+    state: restarted
+    container_log: true
+  when: item.changed and lxc_restart == 'YES'
+  with_items: "{{ lxc_config.results }}"
+
+- name: Manage | Start All Defined Containers
+  lxc_container:
+    name: "{{ item.key }}"
+    container_log: true
+  when: (item.value.autostart is undefined) or item.value.autostart == true
+  with_dict: "{{ lxc_containers }}"
+
+- name: Manage | Install Basic Packages
+  lxc_container:
+    name: "{{ item.lxc_container.name }}"
+    container_log: true
+    container_command: |
+      while [[ ! $(ip add sh dev eth0) =~ "inet " ]]; do
+        sleep .5
+      done
+      apt-get update
+      apt -y upgrade
+      apt -y install sudo python openssh-server ca-certificates
+  with_items: "{{ lxc_create.results }}"
+  when: item.lxc_container is defined
+
+- name: Manage | Get Container info
+  lxc_container:
+    name: "{{ item.key }}"
+  register: lxc_info
+  with_dict: "{{ lxc_containers }}"
+
+# - debug:
+#     var: lxc_info
+# - debug:
+#     var: lxc_containers
+
+- name: Manage | Extract useful info from lxc_info
+  set_fact:
+    lxc_containers_live: "{{ lxc_containers_live|default({}) | combine( {item.item.key: {'ip4': item.lxc_container.ips[0]}} ) }}"
+  with_items:
+    - "{{ lxc_info.results }}"
+
+# - debug:
+#     var: lxc_containers_live
+
+- name: Manage | Save IPv4 in the lxc_containers variable
+  set_fact:
+    lxc_containers: "{{lxc_containers|combine(lxc_containers_live,recursive=True)}}"
+
+# - debug:
+#     var: lxc_containers
+  
+- name: Manage | Print results
+  debug:
+    msg: "Your container [{{ item.item.key }}] is ready for provisioning on ip {{ item.lxc_container.ips[0] }}"
+  with_items: "{{ lxc_info.results }}"

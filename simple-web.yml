@@ -1,0 +1,11 @@
+---
+- name: Install simple web on container hosts
+  hosts: simple_web
+  user: root
+  tags:
+    - simple_web
+    - containers
+  roles:
+    - users
+    - base
+    - nginx

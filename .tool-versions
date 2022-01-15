@@ -1,0 +1,2 @@
+ansible-base = 2.10.16
+python = 3.10.1

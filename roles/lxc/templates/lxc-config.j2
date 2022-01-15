@@ -1,0 +1,32 @@
+# Template used to create this container: /usr/share/lxc/templates/lxc-debian
+# Parameters passed to the template: -r buster
+# Template script checksum (SHA-1): d5aa397522e36a17c64c014dd63c70d8607c9873
+# For additional config options, please look at lxc.container.conf(5)
+
+# Uncomment the following line to support nesting containers:
+#lxc.include = /usr/share/lxc/config/nesting.conf
+# (Be aware this has security implications)
+
+lxc.net.0.type = veth
+lxc.net.0.link = virbr0
+# lxc.net.0.flags = up
+
+lxc.apparmor.profile = generated
+lxc.apparmor.allow_nesting = 1
+lxc.rootfs.path = dir:/var/lib/lxc/{{ item.key }}/rootfs
+
+# Common configuration
+lxc.include = /usr/share/lxc/config/{{ item.distro | default('debian') }}.common.conf
+
+# Container specific configuration
+lxc.tty.max = 4
+lxc.uts.name = {{ item.key }}
+lxc.arch = amd64
+lxc.pty.max = 1024
+{% if item.value.autostart | default(true) %}
+lxc.start.auto = 1
+{% endif %}
+
+# CUSTOM
+
+lxc.mount.entry = /var/lib/lxc/files/ssh root/.ssh none bind,ro,create=dir 0 0

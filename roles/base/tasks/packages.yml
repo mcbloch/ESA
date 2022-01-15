@@ -1,0 +1,6 @@
+---
+- name: Global | Basic Package Installation
+  apt:
+    name: ['sudo', 'git', 'htop', 'zsh', 'curl', 'locales', 'vim', 'dnsutils', 'tmux']
+    update_cache: yes
+  tags: [ 'packages' ]

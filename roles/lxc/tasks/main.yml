@@ -1,0 +1,15 @@
+---
+
+- include: install.yml
+  tags: [ 'install' ]
+
+- include: credentials.yml
+  tags: [ 'credentials' ]
+
+- include: manage.yml
+  tags: [ 'manage' ]
+
+- include: network.yml
+  tags: [ 'network' ]
+
+- meta: flush_handlers

@@ -1,0 +1,60 @@
+---
+- hosts: all
+  tags: always
+  gather_facts: true
+
+# Pick your host. This should be a metal machine (or the most metal you have access to)
+- hosts: metal
+  become: true
+  tags: base-all
+  environment:
+    DOWNLOAD_KEYSERVER: "hkp://keyserver.ubuntu.com"
+  roles:
+    # Prep it for basic usage
+    - role: base
+      tags: ["base"]
+    # Install containers
+    - role: lxc
+      tags: ["lxc"]
+
+# - hosts: metal
+#   become: true
+#   tags: containers
+#   tasks:
+#     - name: Collect container info
+#       community.general.lxc_container:
+#         name: "{{ item.key }}"
+#       register: container_info
+#       with_dict: "{{ lxc_containers }}"
+
+#     - name: Print container info
+#       debug:
+#         msg: "{{ lxc_containers }}"
+
+#     - name: Add ansible hosts for all found containers
+#       ansible.builtin.add_host:
+#         name: "{{ item.item.key }}"
+#         hostname: "{{ item.lxc_container.ips[0] }}"
+#         groups: "{{ item.item.value.groups }}"
+#       loop: "{{ container_info.results }}"
+
+#     - name: show all the hosts matching the pattern, i.e. all in the group container
+#       debug:
+#         msg: "{{ hostvars }}"
+
+# - hosts: all
+#   gather_facts: true
+#   tasks:
+#     - name: show all the hosts matching the pattern, i.e. all in the group container
+#       debug:
+#         msg: "{{ hostvars.simple_web }}"
+#     - name: Refresh inventory to ensure new instances exist in inventory
+#       meta: refresh_inventory
+
+
+# - hosts: container
+#   user: root
+#   roles:
+#     - users
+#     - base
+#   tags: base

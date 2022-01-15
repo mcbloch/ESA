@@ -1,0 +1,20 @@
+ansible.extra_vars:
+  ntp_server: "pool.ntp.org"
+  nginx: 
+    port: 8008
+    workers: 4
+ansible.groups:
+  "main-host": ["vm"]
+  "web": ["vm1", "vm2"]
+  "db": ["vm3"]
+  "atlanta:vars": 
+    "ntp_server": "ntp.atlanta.example.com"
+    "proxy": "proxy.atlanta.example.com"
+ansible.host_vars:
+  "host1":
+    "http_port": 80
+    "maxRequestsPerChild": 808
+    "comments": "text with spaces"
+  "host2":
+    "http_port": 303
+    "maxRequestsPerChild": 909

@@ -1,0 +1,18 @@
+---
+- name: Update repo cache and install bundler
+  apt:
+    name: bundler
+    update_cache: yes
+  become: true
+
+- name: Install the bundle
+  shell: |
+    git clone https://github.com/rea-cruitment/simple-sinatra-app.git
+    cd simple-sinatra-app
+    bundle install
+- name: Run application on port 80
+  shell: |
+    cd simple-sinatra-app
+    ipaddr=$(hostname -I)
+    nohup bundle exec rackup -p 80 --host $ipaddr </dev/null >/dev/null 2>&1 & sleep 1
+  become: true

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcom to nginx!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+  <h1>Hello from container {{ inventory_hostname }}</h1>
+  <p>Groups: {{ group_names }}</p>
+</body>
+</html>

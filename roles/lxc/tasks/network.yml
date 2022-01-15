@@ -1,0 +1,24 @@
+---
+- name: Network | Add container portforwarding
+  command:
+    iptables -t nat -I PREROUTING -p tcp -i eth0 --dport {{ item.host_port }} -j DNAT --to-destination {{lxc_containers[item.container_name].ip4}}:{{ item.container_port }} \
+    -m comment --comment "Add portforward for container {{item.container_name}} from port {{item.host_port}} to {{item.container_port}}"
+  with_items: "{{ port_forwards }}"
+
+- name: Network | Rewrite the source ip of the packet to the ip of the gateway
+  command: iptables -t nat -I POSTROUTING -p tcp --dport {{item.container_port}} -d {{lxc_containers[item.container_name].ip4}} -j SNAT --to-source {{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}
+  with_items: "{{ port_forwards }}"
+
+- name: Network | Open the port on the host
+  command: iptables -I INPUT -p tcp --dport {{item.host_port}} -j ACCEPT
+  with_items: "{{ port_forwards }}"
+
+- name: Network | Accepting connections in both directions
+  command: iptables -I FORWARD -p tcp -d {{lxc_containers[item.container_name].ip4}} --dport {{item.container_port}} -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT # -i eth0 -o virbr0
+  with_items: "{{ port_forwards }}"
+# - name: Network | Accepting connections  in both directions
+#   command: iptables -I FORWARD -i virbr0 -o eth0 -p tcp -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+#   with_items: "{{ port_forwards }}"
+
+- name: Network | Save network configuration
+  command: iptables-save

@@ -1,0 +1,11 @@
+---
+- name: Install a simple ruby web application
+  hosts: ruby_web
+  user: root
+  tags:
+    - ruby_web
+    - containers
+  roles:
+    - users
+    - base
+    - ruby-web

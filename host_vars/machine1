@@ -1,0 +1,42 @@
+---
+# This metal server will define the containers hosted on it
+lxc_containers:
+  simple-web-01:
+    distro: debian
+    release: buster
+    arch: amd64
+    store: dir
+    ip4: 0.0.0.0 # Will be filled in by the lxc role
+  ruby-web-01:
+    ip4: 0.0.0.0
+port_forwards:
+  - host_port: 8321
+    container_port: 80
+    container_name: simple-web-01
+  - host_port: 8322
+    container_port: 80
+    container_name: ruby-web-01
+
+# What do we have?
+#    - a machine (M) with ssh access
+#    - a playbook to deploy an application (A) to a group of hosts (G)
+
+# Flow atm
+#  add container with name (C) to metal (M) config
+#  M creates container C
+#  manually add C to ssh.config with jump through M
+#  manually add C to group G in inventory.ini
+#  define and run a playbook on
+
+
+# Group types
+# - application: these have to be defined in advance and by the user
+#                these have a playbook written by the user
+#                will have a unique container assigned by default if not specified
+#                at the moment only can be put in one container
+# - container: these can be defined by the user.
+#              these can have multiple applications
+#              container is assigned in the application
+# - metal: these have to be defined by the user
+#          these host containers
+#          containers will specify the metal they are installed on

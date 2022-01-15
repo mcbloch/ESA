@@ -1,0 +1,24 @@
+---
+- name: Update apt cache.
+  apt: update_cache=yes cache_valid_time=86400
+  changed_when: false
+  tags: ["packages"]
+
+- name: Ensure nginx is installed.
+  apt:
+    name: nginx
+    state: present
+  tags: ["packages"]
+
+# - name: Remove default html file
+#   file:
+#     path: /var/www/html
+
+
+- name: Install new default html file
+  template:
+    src: index.html.j2
+    dest: /var/www/html/index.html
+
+- name: restart nginx
+  service: name=nginx state=restarted

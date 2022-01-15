@@ -1,0 +1,56 @@
+---
+- name: Install | LXC packages
+  apt:
+    name: ["lxc", "lxc-dev"]
+    update_cache: yes
+  tags: ["packages"]
+
+- name: Install | LXC net packages
+  apt:
+    name:
+      [
+        "libvirt-clients",
+        "libvirt-daemon-system",
+        "iptables",
+        "ebtables",
+        "dnsmasq-base",
+        "libxml2-utils",
+        "iproute2",
+      ]
+    update_cache: yes
+    # libvirt-daemon will pull in the qemu package, which in turn will pull in a lot of GUI stuff which you don't need for LXC
+    install_recommends: false
+  tags: ["packages"]
+
+# avoids race condition with OvS that prevents first container booting
+# - name: Install | add custom lxc-net service
+#   template:
+#     src: lxc-net.service.j2
+#     dest: /lib/systemd/system/lxc-net.service
+#     owner: root
+#     group: root
+#     mode: 0644
+
+# Required for building lxc-python2 for Ansible
+- name: Install | Install pip and python-dev for Ansible module
+  apt:
+    name: ["python-pip", "python-dev"]
+    update_cache: yes
+  tags: ["packages"]
+
+- name: Install | Python Bindings
+  pip:
+    executable: pip2
+    name: lxc-python2
+
+- name: Install | Enable LXC Autostart
+  service:
+    name: lxc
+    enabled: true
+
+- name: Install | Enable LXC net
+  lineinfile:
+    path: /etc/default/lxc-net
+    regexp: "^USE_LXC_BRIDGE="
+    line: USE_LXC_BRIDGE="true"
+    create: true

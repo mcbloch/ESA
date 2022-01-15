@@ -1,0 +1,4 @@
+---
+users:
+  maxime:
+    shell: /bin/bash
