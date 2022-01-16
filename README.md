@@ -28,9 +28,11 @@ Work in progress. All suggestions and comments are welcome.
 
 ## TODO
 
-- Retrieve IP of created container and set as dynamic variable
-- Probably need to use a better dynamic hosts tool
-- Use static ip's
+- Fix dynamic ip's
+  - The ip can't be defined in the central config
+  - Problem: The port forward rules break on reboot -> we can generate an ip on container creation and keep that fixed?
+  - Problem: The ip needs to be set in the inventory to run a playbook and use ssh. We don't want to do this manually.
+- Add ability to use static ip's
   - Not setting the ip is possible but you are then unable to run a playbook against the host automatically. You will need to paste the ip in the inventory manually. The container is possible to get port forwards but the ssh config can not be set automatically atm. Also, all port forwards break on reboot :)
 
 And a big list of other ideas in my personal notes ;)
