@@ -15,7 +15,7 @@ Work in progress. All suggestions and comments are welcome.
 
 - Single declarative configuration. This can be found at [configuration/config.dhall](./configuration/config.dhall)
 - Easy ssh access onto the defined hosts and containers using the esa tool
-  - `esa.sh simple-web-01`
+  - `./esa-ssh simple-web-01`
 - Automatic (lightweight) container setup using the single configuration file with port forwarding
 - Easy to test using a provided Vagrant setup. See the section above.
 - Users: Are defined globally and can be assigned to containers to get access. They will get their own user per container.
@@ -45,6 +45,7 @@ And a big list of other ideas in my personal notes ;)
   - Check yaml validity
   - Check ansible validity
   - Try vagrant test
+- Try to make this usable by other people somehow. I'm not sure how to do this. Packaging it would make it more easy to install but would hide the internals possible making it less extensible. Making it a template gives users full access but makes pushing updates harder.
 
 ## Extras
 

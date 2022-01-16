@@ -6,7 +6,6 @@
     Site with examples : https://dhall-lang.org/
     Why I don't use yaml : https://noyaml.com/
 -}
-
 let Prelude =
       https://prelude.dhall-lang.org/v21.1.0/package.dhall
         sha256:eb693342eb769f782174157eba9b5924cf8ac6793897fc36a31ccbd6f56dafe2
