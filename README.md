@@ -26,6 +26,29 @@ Work in progress. All suggestions and comments are welcome.
 - Only compatible with debian at the moment
 - container ip's are still dynamic, see the test setup above en todo notes below
 
+
+What do we have?
+  - a machine (M) with ssh access
+  - a playbook to deploy an application (A) to a group of hosts (G)
+Flow atm
+  - add container with name (C) to metal (M) config
+  - M creates container C
+  - manually add C to ssh.config with jump through M
+  - manually add C to group G in inventory.ini
+  - define and run a playbook on G
+
+Group types
+- application: these have to be defined in advance and by the user
+               these have a playbook written by the user
+               will have a unique container assigned by default if not specified
+               at the moment only can be put in one container
+- container: these can be defined by the user.
+             these can have multiple applications
+             container is assigned in the application
+- metal: these have to be defined by the user
+         these host containers
+         containers will specify the metal they are installed on
+
 ## TODO
 
 - Fix dynamic ip's
@@ -62,4 +85,3 @@ And a big list of other ideas in my personal notes ;)
 ## More things I try to achieve
 
 - Keep everything in the folder. No usage of external servers or heavy tools.
-- 
