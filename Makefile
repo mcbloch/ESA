@@ -18,11 +18,11 @@ config:
 			--explain \
 			--documents \
 			--generated-comment \
-			--output host_vars.yml
+			--output ../inventory/01-esa_generated.yml
 	cd configuration && echo '(./esa.dhall).ssh_config' | dhall text \
 			--output ssh.config
 test:
 	vagrant up --provision
 test-container:
-	ansible-playbook -i inventory.ini simple-web.yml
-	ansible-playbook -i inventory.ini ruby-web.yml
+	ansible-playbook simple-web.yml
+	ansible-playbook ruby-web.yml

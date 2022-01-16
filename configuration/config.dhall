@@ -1,3 +1,13 @@
+{- let machine2 =
+      types.Metal::{
+      , name = "zeus-king"
+      , ssh_config = types.SshConfig::{
+        , hostname = "zeus.ugent.be"
+        , port = 2222
+        , user = "root"
+        , identity_file = "~/.ssh/id_ed25519_zeus"
+        }
+      } -}
 let Prelude =
       https://prelude.dhall-lang.org/v21.1.0/package.dhall
         sha256:eb693342eb769f782174157eba9b5924cf8ac6793897fc36a31ccbd6f56dafe2
@@ -11,9 +21,28 @@ let c1 =
       , release = "buster"
       , arch = "amd64"
       , store = "dir"
+      , ssh_config = types.SshConfig::{
+        , hostname = "192.168.122.125"
+        , identity_file = "~/.ssh/id_ed25519_common"
+        }
       }
 
-let c2 = types.Container::{ name = "ruby-web-01" }
+let a1
+    : types.Application
+    = { name = "simple_web", containers = [ c1 ] }
+
+let c2 =
+      types.Container::{
+      , name = "ruby-web-01"
+      , ssh_config = types.SshConfig::{
+        , hostname = "192.168.122.249"
+        , identity_file = "~/.ssh/id_ed25519_common"
+        }
+      }
+
+let a2
+    : types.Application
+    = { name = "ruby_web", containers = [ c2 ] }
 
 let machine1 =
       types.Metal::{
@@ -31,15 +60,8 @@ let machine1 =
         }
       }
 
-let machine2 =
-      types.Metal::{
-      , name = "zeus-king"
-      , ssh_config = types.SshConfig::{
-        , hostname = "zeus.ugent.be"
-        , port = 2222
-        , user = "root"
-        , identity_file = "~/.ssh/id_ed25519_zeus"
-        }
+in    { containers = [ c1, c2 ]
+      , metals = [ machine1 ]
+      , applications = [ a1, a2 ]
       }
-
-in  { containers = [ c1, c2 ], metals = [ machine1, machine2 ] } : types.Config
+    : types.Config

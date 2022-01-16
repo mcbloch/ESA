@@ -22,11 +22,13 @@ Vagrant.configure("2") do |config|
   config.vm.box = "bento/debian-10.11"
   config.vm.provision "ansible" do |ansible|
     ansible.playbook = "playbook.yml"
-    ansible.groups = {
-      "metal" => ["machine1"],
+    # https://github.com/hashicorp/vagrant/issues/9893
+    ansible.raw_arguments = ["--inventory", "inventory" ]
+    # ansible.groups = {
+      # "metal" => ["machine1"],
       #"simple_web" => ["simple_web-container"],
       #"container" => ["simple_web-container"],
-    }
+    # }
     # ansible.verbose = "vvv"
     # ansible.tags = "network"
   end

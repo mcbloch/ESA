@@ -4,6 +4,14 @@ An opinionated wrapper around ansible to make it hard to use incorrectly.
 
 Work in progress. All suggestions and comments are welcome.
 
+## How to run current test
+
+- run `make test`, this ups a vagrant host with a few lxc containers on it.
+- copy the container ip's from stdout and set them in configuration/config.dhall
+- run `make config` to update the generated config files
+- run `make test-container` to run example ansible playbooks against the containers
+
+
 ## Introduction
 
 

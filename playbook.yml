@@ -16,6 +16,7 @@
     # Install containers
     - role: lxc
       tags: ["lxc"]
+      when: lxc_containers is defined
 
 # - hosts: metal
 #   become: true
