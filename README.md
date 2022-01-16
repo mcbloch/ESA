@@ -19,6 +19,7 @@ Work in progress. All suggestions and comments are welcome.
 - Automatic (lightweight) container setup using the single configuration file with port forwarding
 - Easy to test using a provided Vagrant setup. See the section above.
 - Users: Are defined globally and can be assigned to containers to get access. They will get their own user per container.
+- Retain the full power of ansible by generating config files and letting ansible use those.
 
 ### Notes
 
@@ -32,12 +33,13 @@ Work in progress. All suggestions and comments are welcome.
 - Use static ip's
   - Not setting the ip is possible but you are then unable to run a playbook against the host automatically. You will need to paste the ip in the inventory manually. The container is possible to get port forwards but the ssh config can not be set automatically atm. Also, all port forwards break on reboot :)
 
+And a big list of other ideas in my personal notes ;)
+
 ## Roadmap
 
 - Add vault best practices
-- Add a bastion user to jump through the host to containers (without shell access for the bastion)
+- Add an unprivileged bastion user to jump through the host to containers (without shell access for the bastion)
 - Run unprivileged containers
-- Add ssh wrapper that adds flags to add the generated ssh.config
 
 - Add automatic testing on filechanges
   - Check yaml validity
