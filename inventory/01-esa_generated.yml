@@ -8,9 +8,15 @@ all:
     ruby_web:
       hosts:
         ruby-web-01: []
+      vars:
+        users:
+          - maxime
     simple_web:
       hosts:
         simple-web-01: []
+      vars:
+        users:
+          - maxime
   hosts:
     machine1:
       lxc_containers:

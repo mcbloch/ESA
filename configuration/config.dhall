@@ -27,10 +27,6 @@ let c1 =
         }
       }
 
-let a1
-    : types.Application
-    = { name = "simple_web", containers = [ c1 ] }
-
 let c2 =
       types.Container::{
       , name = "ruby-web-01"
@@ -39,10 +35,6 @@ let c2 =
         , identity_file = "~/.ssh/id_ed25519_common"
         }
       }
-
-let a2
-    : types.Application
-    = { name = "ruby_web", containers = [ c2 ] }
 
 let machine1 =
       types.Metal::{
@@ -59,6 +51,14 @@ let machine1 =
         , identity_file = ".vagrant/machines/machine1/virtualbox/private_key"
         }
       }
+
+let a1
+    : types.Application
+    = { name = "simple_web", users = [ "maxime" ], containers = [ c1 ] }
+
+let a2
+    : types.Application
+    = { name = "ruby_web", users = [ "maxime" ], containers = [ c2 ] }
 
 in    { containers = [ c1, c2 ]
       , metals = [ machine1 ]

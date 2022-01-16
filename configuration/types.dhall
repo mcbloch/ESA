@@ -29,7 +29,10 @@ let Container =
         }
       }
 
-let Application = { name : Text, containers : List Container.Type }
+let ApplicationVars = { users : List Text }
+
+let Application =
+      { name : Text, users : List Text, containers : List Container.Type }
 
 let PortForward =
       { host_port : Natural, container_port : Natural, container_name : Text }
@@ -63,6 +66,7 @@ let Config =
 
 in  { Container
     , ContainerVars
+    , ApplicationVars
     , Application
     , PortForward
     , Metal

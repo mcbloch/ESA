@@ -10,6 +10,8 @@ let Prelude =
       https://prelude.dhall-lang.org/v21.1.0/package.dhall
         sha256:eb693342eb769f782174157eba9b5924cf8ac6793897fc36a31ccbd6f56dafe2
 
+let List/map = Prelude.List.map
+
 let types = ./types.dhall
 
 let config = ./config.dhall
@@ -64,37 +66,50 @@ let toContainerHostVars =
         , mapValue = HostVarsType.CV { name = container.name }
         }
 
-let GroupVars =
+let InventoryGroupApplicationVars = types.ApplicationVars
+
+let InventoryGroupVars = Optional InventoryGroupApplicationVars
+
+let InventoryGroup =
       { mapKey : Text
-      , mapValue : { hosts : List { mapKey : Text, mapValue : List Text } }
+      , mapValue :
+          { hosts : List { mapKey : Text, mapValue : List Text }
+          , vars : InventoryGroupVars
+          }
       }
+
+let InventoryGroups = List InventoryGroup
 
 let toAppGroups =
       λ(app : types.Application) →
         { mapKey = app.name
-        , mapValue.hosts
-          =
-            Prelude.List.map
-              types.Container.Type
-              { mapKey : Text, mapValue : List Text }
-              ( λ(c : types.Container.Type) →
-                  { mapKey = c.name, mapValue = [] : List Text }
-              )
-              app.containers
+        , mapValue =
+          { hosts =
+              Prelude.List.map
+                types.Container.Type
+                { mapKey : Text, mapValue : List Text }
+                ( λ(c : types.Container.Type) →
+                    { mapKey = c.name, mapValue = [] : List Text }
+                )
+                app.containers
+          , vars = Some app.(types.ApplicationVars)
+          }
         }
 
 let toMetalGroups =
       λ(metals : List types.Metal.Type) →
         [ { mapKey = "metal"
-          , mapValue.hosts
-            =
-              Prelude.List.map
-                types.Metal.Type
-                { mapKey : Text, mapValue : List Text }
-                ( λ(m : types.Metal.Type) →
-                    { mapKey = m.name, mapValue = [] : List Text }
-                )
-                metals
+          , mapValue =
+            { hosts =
+                Prelude.List.map
+                  types.Metal.Type
+                  { mapKey : Text, mapValue : List Text }
+                  ( λ(m : types.Metal.Type) →
+                      { mapKey = m.name, mapValue = [] : List Text }
+                  )
+                  metals
+            , vars = None InventoryGroupApplicationVars
+            }
           }
         ]
 
@@ -115,7 +130,7 @@ let toHostVars =
           , children =
                 Prelude.List.map
                   types.Application
-                  GroupVars
+                  InventoryGroup
                   toAppGroups
                   config.applications
               # toMetalGroups config.metals

@@ -1,4 +1,5 @@
 ---
-users:
+all_users:
   maxime:
-    shell: /bin/bash
+    shell: /bin/fish
+    apt: [ "fish" ]

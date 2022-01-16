@@ -1,31 +1,31 @@
 ---
 - name: Users | User Management
   user:
-    name: "{{ item.key }}"
-    state: "{{ item.value.state | default('present') }}"
-    password: "{{ item.value.password | default('')}}"
-    shell: "{{ item.value.shell | default('/bin/bash') }}"
+    name: "{{ item }}"
+    state: "{{  all_users[item].state | default('present') }}"
+    password: "{{ all_users[item].password | default('')}}"
+    shell: "{{ all_users[item].shell | default('/bin/bash') }}"
     update_password: always
-  with_dict: "{{ users }}"
+  loop: "{{ users }}"
 
 # Playbook now uses 'exclusive'
 # This will clobber any missing keys on the target host
 - name: Users | Public authorized_keys
   authorized_key:
     exclusive: yes
-    user: "{{ item.key }}"
-    key: "{{ lookup('file', 'files/keys/' + item.key) }}"
-  with_dict: "{{ users }}"
+    user: "{{ item }}"
+    key: "{{ lookup('file', 'files/keys/' + item) }}"
+  loop: "{{ users }}"
   ignore_errors: true
   tags: [ 'keys' ]
 
 - name: Users | Sudoers
   lineinfile:
     dest: /etc/sudoers
-    regexp: "^{{ item.key }} ALL="
-    line: "{{ item.key }} ALL=(ALL) NOPASSWD:ALL"
+    regexp: "^{{ item }} ALL="
+    line: "{{ item }} ALL=(ALL) NOPASSWD:ALL"
     validate: "visudo -cf %s"
-  with_dict: "{{ users }}"
+  loop: "{{ users }}"
   tags: [ 'sudo' ]
 
 - name: Users | PermitRootLogin without-password
@@ -35,3 +35,11 @@
     line: "PermitRootLogin without-password"
   notify: restart sshd
   tags: [ 'sudo', 'root' ]
+
+- name: Users | Install extra packages
+  apt:
+    name: "{{ all_users[item].apt }}"
+    update_cache: yes
+  tags: ["packages"]
+  loop: "{{ users }}"
+  when: all_users[item].apt is defined
